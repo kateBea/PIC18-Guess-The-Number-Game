@@ -157,16 +157,16 @@ void displayChar(char ch, char display)
     switch (display)
     {
     case 0:
-        PORTAbits.RA0 = 1;
+        PORTAbits.RA0 = LOGIC_HIGH;
         break;
     case 1:
-        PORTAbits.RA1 = 1;
+        PORTAbits.RA1 = LOGIC_HIGH;
         break;
     case 2:
-        PORTAbits.RA2 = 1;
+        PORTAbits.RA2 = LOGIC_HIGH;
         break;
     case 3:
-        PORTAbits.RA3 = 1;
+        PORTAbits.RA3 = LOGIC_HIGH;
         break;
     }
     __delay_us(50);
@@ -217,7 +217,7 @@ void interrupt ISR_other(void)
 {
     if (INTCONbits.INT0IE && INTCONbits.INT0IF)
     {
-        INTCONbits.INT0IF = 0;
+        INTCONbits.INT0IF = LOGIC_LOW;
         ++counter;
         return;
     }
@@ -225,14 +225,14 @@ void interrupt ISR_other(void)
 
 void interrupt low_priority ISR_low(void)
 {
-    INTCONbits.RBIF = 0;
+    INTCONbits.RBIF = LOGIC_LOW;
 
     if (INTCON3bits.INT1IE && INTCON3bits.INT1IF)
     {
         // Disable INT1 as we don't want to process
         // INT1 interrups while game is in RUNNING state
-        INTCON3bits.INT1IE = 0;
-        INTCON3bits.INT1IF = 0;
+        INTCON3bits.INT1IE = LOGIC_LOW;
+        INTCON3bits.INT1IF = LOGIC_LOW;
         DELAY_AMOUNT = 20;
         GAME_STATUS = RUNNING;
     }
@@ -324,23 +324,25 @@ void config_PIC(void)
 // setup interrupts for PIC18
 void setupInterruptions(void)
 {
-    RCONbits.IPEN = 1;   // Interrupt priority enable bit
-    INTCONbits.GIEH = 1; // Global Interrupt enable bit
-    INTCONbits.GIEL = 1; // Enable low priority interrupts
+    RCONbits.IPEN       = LOGIC_HIGH;   // Interrupt priority enable bit
+    INTCONbits.GIEH     = LOGIC_HIGH;   // Global Interrupt enable bit
+    INTCONbits.GIEL     = LOGIC_HIGH;   // Enable low priority interrupts
 
-    INTCON2bits.INTEDG0 = 1; // Interrupt on INT1 rising edge
-    INTCONbits.INT0IE = 1;   // External interrupt enable INT0
-    INTCONbits.INT0IF = 0;   // Clear IF flag of INT0 interrupt
+    INTCON2bits.INTEDG0 = LOGIC_HIGH;   // Interrupt on INT1 rising edge
+    INTCONbits.INT0IE   = LOGIC_HIGH;   // External interrupt enable INT0
+    INTCONbits.INT0IF   = LOGIC_LOW;    // Clear IF flag of INT0 interrupt
 
+    
     // INT1 setup to adress game start latency issues
-    INTCON3bits.INT1IE = 1;  // External interrupt enable INT1
-    INTCON2bits.INTEDG1 = 1; // Interrupt on INT1 rising edge
-    INTCON3bits.INT1IP = 0;  // External interrupt priority low INT1
-    INTCON3bits.INT1IF = 0;  // Clear IF flag of INT1 interrupt
+    
+    INTCON3bits.INT1IE  = LOGIC_HIGH;   // External interrupt enable INT1
+    INTCON2bits.INTEDG1 = LOGIC_HIGH;   // Interrupt on INT1 rising edge
+    INTCON3bits.INT1IP  = LOGIC_LOW;    // External interrupt priority low INT1
+    INTCON3bits.INT1IF  = LOGIC_LOW;    // Clear IF flag of INT1 interrupt
 
-    INTCONbits.RBIE = 1;  // Enables the IOCx port change interrupt
-    INTCONbits.RBIF = 0;  // Port B Interrupt-On-Change (IOCx) Interrupt Flag bit
-    INTCON2bits.RBIP = 0; // RB Port Change Interrupt Priority low
+    INTCONbits.RBIE     = LOGIC_HIGH;   // Enables the IOCx port change interrupt
+    INTCONbits.RBIF     = LOGIC_LOW;    // Port B Interrupt-On-Change (IOCx) Interrupt Flag bit
+    INTCON2bits.RBIP    = LOGIC_LOW;    // RB Port Change Interrupt Priority low
 }
 
 void main(void)
@@ -445,7 +447,7 @@ void main(void)
 
             // Enable INT1 interrupt so
             // we can start game again
-            INTCON3bits.INT1IE = 1;
+            INTCON3bits.INT1IE = LOGIC_HIGH;
             INTCON3bits.INT1IF = 0;
 
             PORTC = 0;
